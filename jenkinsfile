@@ -1,0 +1,37 @@
+#!groovy
+pipeline {
+	agent any
+	tools { 
+      maven 'maven-3.8.6' 
+    }
+  stages {
+    stage ('git clone') {
+        steps {
+            git 'https://github.com/dhanshri1994/hello-world.git'
+        }
+    }  
+  	stage('Maven Install') {
+      steps {
+      	sh 'mvn clean install'
+      }
+    }
+    
+    stage('Build')  {
+    	agent any
+      steps {
+      	sh 'docker build -t dhanshri1994/hello-world:latest /var/lib/jenkins/workspace/docker-image-maven-project/'
+      }
+}
+     stage('Publish image to Docker Hub') {
+          
+            steps {
+        withDockerRegistry([ credentialsId: "68aab52c-2b37-4434-814c-39d3ca7def10", url: "" ]) {
+          sh  'docker push dhanshri1994/hello-world:latest'
+        }
+                  
+          }
+            
+
+}
+}
+}
